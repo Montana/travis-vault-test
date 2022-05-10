@@ -1,0 +1,20 @@
+language: generic
+jdk:
+  - oraclejdk8
+env:
+  - VAULT_ADDR=http://localhost:8200
+sudo: required
+before_install:
+  - wget https://releases.hashicorp.com/vault/0.5.2/vault_0.5.2_linux_amd64.zip
+  - unzip vault_0.5.2_linux_amd64.zip
+  - ./vault server -dev &
+  - ./vault version 
+  - ./vault status
+before_script:
+  - ./vault auth-enable userpass
+  - ./vault write auth/userpass/users/montana password=foo policies=root
+  - ./vault auth-enable app-id
+  - ./vault write auth/app-id/map/app-id/foo value=root display_name=foo
+  - ./vault write auth/app-id/map/user-id/bar value=foo
+script: 
+ - bash -n terraform.sh
